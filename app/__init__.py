@@ -1,1 +1,0 @@
-# Spotify Downloader App Package
