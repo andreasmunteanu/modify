@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Moodify">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="description" content="Download and play music from Spotify & YouTube. Your personal music library.">
+    <title>Moodify — Music Downloader & Player</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- ═══ Download View ═══ -->
+        <div class="view active" id="view-download">
+            <div class="view-scroll">
+                <header class="view-header">
+                    <h1 class="view-title">Download</h1>
+                    <p class="view-subtitle">Paste a Spotify or YouTube link</p>
+                </header>
+
+                <div class="card" id="download-card">
+                    <div class="input-group">
+                        <div class="input-row">
+                            <div class="url-input-wrap" id="url-input-wrap">
+                                <svg class="input-ico" viewBox="0 0 24 24" fill="none" width="18" height="18"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                <input type="url" id="url-input" placeholder="https://open.spotify.com/track/..." autocomplete="off" spellcheck="false" enterkeyhint="go">
+                                <button class="icon-btn paste-btn" id="paste-btn" aria-label="Paste">
+                                    <svg viewBox="0 0 24 24" fill="none" width="18" height="18"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="url-badge" id="url-badge"></div>
+                    </div>
+
+                    <div class="format-row">
+                        <span class="format-label">Format</span>
+                        <div class="format-pills" id="format-pills">
+                            <button class="pill active" data-fmt="mp3">MP3</button>
+                            <button class="pill" data-fmt="flac">FLAC</button>
+                            <button class="pill" data-fmt="ogg">OGG</button>
+                        </div>
+                    </div>
+
+                    <button class="primary-btn" id="dl-btn">
+                        <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        <span>Download</span>
+                    </button>
+                </div>
+
+                <!-- Progress Card -->
+                <div class="card progress-card hidden" id="progress-card">
+                    <div class="prog-top">
+                        <div class="prog-status">
+                            <div class="dot-pulse"></div>
+                            <span id="prog-text">Connecting...</span>
+                        </div>
+                        <span class="prog-pct" id="prog-pct"></span>
+                    </div>
+                    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+                    <p class="prog-detail" id="prog-detail"></p>
+                </div>
+
+                <!-- Result Card -->
+                <div class="card result-card hidden" id="result-card">
+                    <div class="result-icon">
+                        <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><circle cx="12" cy="12" r="10" stroke="#1DB954" stroke-width="2"/><path d="M8 12l3 3 5-5" stroke="#1DB954" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <div class="result-info">
+                        <p class="result-title" id="result-title">Downloaded!</p>
+                        <p class="result-sub" id="result-sub">Added to your library</p>
+                    </div>
+                </div>
+
+                <!-- Error Card -->
+                <div class="card error-card hidden" id="error-card">
+                    <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><circle cx="12" cy="12" r="10" stroke="#ff4466" stroke-width="2"/><line x1="15" y1="9" x2="9" y2="15" stroke="#ff4466" stroke-width="2" stroke-linecap="round"/><line x1="9" y1="9" x2="15" y2="15" stroke="#ff4466" stroke-width="2" stroke-linecap="round"/></svg>
+                    <p id="error-text">Something went wrong</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ Library View ═══ -->
+        <div class="view" id="view-library">
+            <div class="view-scroll">
+                <header class="view-header">
+                    <h1 class="view-title">Library</h1>
+                    <p class="view-subtitle" id="lib-count">0 songs</p>
+                </header>
+                <div class="search-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <input type="search" id="lib-search" placeholder="Search songs...">
+                </div>
+                <div id="lib-list" class="song-list"></div>
+                <div class="empty-state" id="lib-empty">
+                    <div class="empty-icon">🎵</div>
+                    <p class="empty-title">No songs yet</p>
+                    <p class="empty-sub">Download some tracks to get started</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ Settings View ═══ -->
+        <div class="view" id="view-settings">
+            <div class="view-scroll">
+                <header class="view-header">
+                    <h1 class="view-title">Settings</h1>
+                </header>
+                <div class="card settings-card">
+                    <div class="setting-item">
+                        <span class="setting-name">Storage Used</span>
+                        <span class="setting-value" id="storage-used">0 MB</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-name">Songs in Library</span>
+                        <span class="setting-value" id="settings-count">0</span>
+                    </div>
+                    <div class="setting-divider"></div>
+                    <button class="danger-btn" id="clear-lib-btn">Clear Entire Library</button>
+                </div>
+                <div class="card settings-card">
+                    <div class="setting-item">
+                        <span class="setting-name">App</span>
+                        <span class="setting-value">Moodify v1.0</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-name">Powered by</span>
+                        <span class="setting-value">spotdl + yt-dlp</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ Now Playing (overlay) ═══ -->
+        <div class="now-playing-overlay" id="np-overlay">
+            <div class="np-bg" id="np-bg"></div>
+            <div class="np-content">
+                <button class="np-collapse" id="np-collapse" aria-label="Minimize">
+                    <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="np-art-wrap">
+                    <div class="np-art" id="np-art">
+                        <svg viewBox="0 0 24 24" fill="none" width="64" height="64"><circle cx="12" cy="12" r="10" stroke="#333" stroke-width="1"/><path d="M9 18V6l9 6-9 6z" fill="#444"/></svg>
+                    </div>
+                </div>
+                <div class="np-info">
+                    <h2 class="np-title" id="np-title">Not Playing</h2>
+                    <p class="np-artist" id="np-artist">—</p>
+                </div>
+                <div class="np-seek">
+                    <input type="range" class="seek-slider" id="seek-slider" min="0" max="100" value="0" step="0.1">
+                    <div class="np-times">
+                        <span id="np-current">0:00</span>
+                        <span id="np-duration">0:00</span>
+                    </div>
+                </div>
+                <div class="np-controls">
+                    <button class="ctrl-btn" id="btn-shuffle" aria-label="Shuffle">
+                        <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><polyline points="16 3 21 3 21 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="4" y1="20" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="21 16 21 21 16 21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="15" y1="15" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="4" y1="4" x2="9" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </button>
+                    <button class="ctrl-btn" id="btn-prev" aria-label="Previous">
+                        <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><polygon points="19 20 9 12 19 4" fill="currentColor"/><line x1="5" y1="4" x2="5" y2="20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    </button>
+                    <button class="ctrl-btn play-btn" id="btn-play" aria-label="Play">
+                        <svg class="play-icon" viewBox="0 0 24 24" fill="none" width="32" height="32"><polygon points="6 3 20 12 6 21" fill="currentColor"/></svg>
+                        <svg class="pause-icon hidden" viewBox="0 0 24 24" fill="none" width="32" height="32"><rect x="5" y="3" width="5" height="18" rx="1" fill="currentColor"/><rect x="14" y="3" width="5" height="18" rx="1" fill="currentColor"/></svg>
+                    </button>
+                    <button class="ctrl-btn" id="btn-next" aria-label="Next">
+                        <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><polygon points="5 4 15 12 5 20" fill="currentColor"/><line x1="19" y1="4" x2="19" y2="20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    </button>
+                    <button class="ctrl-btn" id="btn-repeat" aria-label="Repeat">
+                        <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><polyline points="17 1 21 5 17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 11V9a4 4 0 014-4h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="7 23 3 19 7 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 13v2a4 4 0 01-4 4H3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ Mini Player Bar ═══ -->
+        <div class="mini-player hidden" id="mini-player">
+            <div class="mini-progress"><div class="mini-fill" id="mini-fill"></div></div>
+            <div class="mini-body" id="mini-body">
+                <div class="mini-art" id="mini-art">
+                    <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M9 18V6l9 6-9 6z" fill="#555"/></svg>
+                </div>
+                <div class="mini-info">
+                    <span class="mini-title" id="mini-title">Not Playing</span>
+                    <span class="mini-artist" id="mini-artist">—</span>
+                </div>
+                <button class="mini-play" id="mini-play-btn" aria-label="Play/Pause">
+                    <svg class="play-icon" viewBox="0 0 24 24" width="22" height="22"><polygon points="6 3 20 12 6 21" fill="currentColor"/></svg>
+                    <svg class="pause-icon hidden" viewBox="0 0 24 24" width="22" height="22"><rect x="5" y="3" width="5" height="18" rx="1" fill="currentColor"/><rect x="14" y="3" width="5" height="18" rx="1" fill="currentColor"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- ═══ Tab Bar ═══ -->
+        <nav class="tab-bar" id="tab-bar">
+            <button class="tab active" data-view="download">
+                <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <span>Download</span>
+            </button>
+            <button class="tab" data-view="library">
+                <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><path d="M9 18V5l12-2v13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="6" cy="18" r="3" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="16" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                <span>Library</span>
+            </button>
+            <button class="tab" data-view="settings">
+                <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="2"/></svg>
+                <span>Settings</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
